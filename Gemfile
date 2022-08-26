@@ -36,7 +36,10 @@ gem "require_all", "~> 3.0"
 
 #PROJECT ADD
 #Adds gem that utilizes the CryptoCompare API to fetch data related to cryptocurrencies.
-gem 'cryptocompare'
+gem "cryptocompare"
+
+#Adds Fake data for seeding
+gem "faker"
 
 # These gems will only be used when we are running the application locally
 group :development do

@@ -1,15 +1,37 @@
 require 'cryptocompare'
+require 'faker'
 
 puts "🌱 Seeding spices..."
 
-cryptolist = Cryptocompare::CoinList.all
-cryptoKeys = cryptolist["Data"].keys
-cryptoKeys.each do |crypt|
+all = Cryptocompare::CoinList.all
+coin_array = all["Data"].to_a.map{|i| i.last}.sort_by{|i| i["SortOrder"].to_i}.first(9)
+coin_array.each do |crypt|
+    puts crypt["Symbol"]
     Crypto.create(
-        name: cryptolist["Data"]["#{crypt}"]["FullName"]
-        ticker: "#{crypt}"
-        price: Cryptocompare::Price.full("#{crypt}", 'USD')["RAW"]["#{crypt}"]["USD"]["PRICE"]
-        volume: Cryptocompare::Price.full("#{crypt}", 'USD')["RAW"]["#{crypt}"]["USD"]["VOLUME24HOUR"]
+        name: crypt["FullName"],
+        ticker: crypt["Symbol"],
+        price: Cryptocompare::Price.full("#{crypt["Symbol"]}", 'USD')["RAW"]["#{crypt["Symbol"]}"]["USD"]["PRICE"],
+        volume: Cryptocompare::Price.full("#{crypt["Symbol"]}", 'USD')["RAW"]["#{crypt["Symbol"]}"]["USD"]["VOLUME24HOUR"]
+        )
+        
+end
+
+10.times do 
+    Portfolio.create(
+       name: Faker::Name.name
     )
+end
+
+
+50.times do
+    crypt=Crypto.all.sample
+    Purchase.create(
+        sold: Faker::Boolean.boolean,
+        amount_purchaced: Faker::Number.between(from: 1, to: 30),
+        purchase_price: Cryptocompare::PriceHistorical.find("#{crypt.ticker}", 'USD', {'ts' => Faker::Time.between(from: DateTime.now - 30, to: DateTime.now).to_i.to_s})["#{crypt.ticker}"]["USD"],
+        crypto_id: crypt.id,
+        portfolio_id: Portfolio.all.map{|i| i.id}.sample
+    )
+end
 
 puts "✅ Done seeding!"
