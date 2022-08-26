@@ -24,14 +24,15 @@ end
 
 
 50.times do
-    crypt=Crypto.all.sample
+    crypt = Crypto.all.sample
+    sells = Faker::Boolean.boolean
     Purchase.create(
-        sold: Faker::Boolean.boolean,
+        sold: sells,
         amount_purchaced: Faker::Number.between(from: 1, to: 30),
-        purchase_price: Cryptocompare::PriceHistorical.find("#{crypt.ticker}", 'USD', {'ts' => Faker::Time.between(from: DateTime.now - 30, to: DateTime.now).to_i.to_s})["#{crypt.ticker}"]["USD"],
+        purchase_price: Cryptocompare::PriceHistorical.find("#{crypt.ticker}", 'USD', {'ts' => Faker::Time.between(from: DateTime.now - 60, to: DateTime.now - 30).to_i.to_s})["#{crypt.ticker}"]["USD"],
+        profit: (Cryptocompare::PriceHistorical.find("#{crypt.ticker}", 'USD', {'ts' => Faker::Time.between(from: DateTime.now - 30, to: DateTime.now).to_i.to_s})["#{crypt.ticker}"]["USD"] if sells),
         crypto_id: crypt.id,
         portfolio_id: Portfolio.all.map{|i| i.id}.sample
     )
 end
-
 puts "✅ Done seeding!"
