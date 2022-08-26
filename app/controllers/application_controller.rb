@@ -27,15 +27,23 @@ class ApplicationController < Sinatra::Base
   #purchase routes
   get '/purchases' do
     purchases = Purchase.all
+    purchases.each do |p|
+      p.update_profit
+    end
     purchases.to_json
   end
   get '/purchases/:id' do
     purchase = Purchase.find(params[:id])
-    
+    purchases.each do |p|
+      p.update_profit
+    end
     purchase.to_json
   end
   patch '/purchases/:id' do
     purchase = Purchase.find(params[:id])
+    purchases.each do |p|
+      p.update_profit
+    end
     purchase.patch(params)
     purchase.to_json
   end
@@ -46,6 +54,9 @@ class ApplicationController < Sinatra::Base
   end
   post '/purchases' do
     purchase = Purchase.create(params)
+    purchases.each do |p|
+      p.update_profit
+    end
     portfolio.to_json
   end
 
