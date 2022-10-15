@@ -2,12 +2,16 @@ class ApplicationController < Sinatra::Base
   set :default_content_type, 'application/json'
   #portfolio routes
   get '/portfolios' do
-    portfolios = Portfolio.all
-    portfolios.to_json
+    portfolios = Portfolio.all.includes(:purchases)
+    portfolios.to_json(include: :purchases) 
   end
   get '/portfolios/:id' do
     portfolio = Portfolio.find(params[:id])
-    portfolio.to_json
+    portfolio.to_json(include: :purchases) 
+  end
+  get '/portfolios/:id/:cid' do
+    portfolio = Portfolio.find(params[:id]).purchases.where(crypto_id: params[:cid])
+    portfolio.to_json 
   end
   post '/portfolios' do
     portfolio = Portfolio.create(
@@ -34,17 +38,13 @@ class ApplicationController < Sinatra::Base
   end
   get '/purchases/:id' do
     purchase = Purchase.find(params[:id])
-    purchases.each do |p|
-      p.update_profit
-    end
+    purchase.update_profit
     purchase.to_json
   end
   patch '/purchases/:id' do
     purchase = Purchase.find(params[:id])
-    purchases.each do |p|
-      p.update_profit
-    end
-    purchase.patch(params)
+    purchase.update_profit
+    purchase.update(params)
     purchase.to_json
   end
   delete '/purchases/:id' do
@@ -54,9 +54,7 @@ class ApplicationController < Sinatra::Base
   end
   post '/purchases' do
     purchase = Purchase.create(params)
-    purchases.each do |p|
-      p.update_profit
-    end
+    purchase.update_profit
     portfolio.to_json
   end
 
